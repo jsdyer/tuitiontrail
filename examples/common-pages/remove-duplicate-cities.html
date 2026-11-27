@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en-CA"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}} · CoolCode</title><meta name="description" content="{{DESCRIPTION}}">
+<link rel="stylesheet" href="{{ASSET_PREFIX}}style.css"><script type="module" src="{{ASSET_PREFIX}}app.mjs"></script>
+{{VISIT_COUNTER}}
+</head><body data-tool-id="{{TOOL_ID}}">
+<a class="skip" href="#main">Skip to list</a><header><a href="../">All list tools</a><a href="{{SOURCE_URL}}">Source &amp; instructions</a></header>
+<main id="main"><h1>{{TITLE}}</h1><p class="intro">{{DESCRIPTION}}</p>
+<section aria-label="City lists"><div class="panels">
+<div><label for="input">Original city list</label><textarea id="input" rows="6" maxlength="100000" spellcheck="false">Vancouver
+  Halifax
+Vancouver
+Charlottetown
+Halifax</textarea></div>
+<div><label for="output">Cleaned city list</label><textarea id="output" rows="6" readonly>Vancouver
+Halifax
+Charlottetown</textarea></div>
+</div><div class="actions"><button id="sample" type="button">Restore example</button><button id="clear" type="button">Clear</button><button id="copy" type="button" hidden>Copy result</button></div>
+<p id="status" role="status" aria-live="polite">3 unique lines. 2 duplicates removed.</p>
+<noscript>Enable JavaScript to edit the example and recalculate.</noscript></section>
+<aside>List contents stay in your browser tab.</aside></main>
+<footer><a href="https://coolcode.ca/">CoolCode.ca</a> · {{ISSUE_LINK}}</footer>
+</body></html>

@@ -1,0 +1,7 @@
+[
+  {
+    "slug": "remove-duplicate-cities",
+    "title": "Remove duplicate cities from a list",
+    "description": "Clean a sample city list with repeated entries, then paste your own list to trim spacing and keep the first occurrence of each city."
+  }
+]
