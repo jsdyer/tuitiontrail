@@ -1,16 +1,19 @@
 {
-  "id": "coolcode-tool-template",
-  "title": "CoolCode Tool Starter",
-  "description": "A browser-only example that trims lines and removes exact duplicates.",
-  "category": "security",
-  "tags": ["text", "lines", "duplicates"],
-  "icon": "scan-search",
-  "url": "/coolcode-tool-template/",
-  "source": "https://github.com/jsdyer/coolcode-tool-template",
+  "id": "tuitiontrail",
+  "title": "Tuition Trail",
+  "description": "Compare Canadian undergraduate tuition by field, province and academic year, then explore reported employment income for earlier graduate cohorts.",
+  "category": "money",
+  "tags": ["tuition", "universities", "students", "Canada", "graduate earnings", "education", "Statistics Canada"],
+  "icon": "chart-no-axes-combined",
+  "url": "/tuitiontrail/",
+  "source": "https://github.com/jsdyer/tuitiontrail",
   "hosting": "project",
   "access": "browser",
   "data_info": {
-    "mode": "local",
-    "detail": "The browser reads the text you paste and compares its lines."
-  }
+    "mode": "snapshot",
+    "detail": "Statistics Canada’s Canadian undergraduate tuition averages and graduate employment income medians have separate units, fields and reference years.",
+    "cadence": "Monthly source check",
+    "probes": [{"label":"Last successful source check","url":"https://coolcode.ca/tuitiontrail/data/status.json","path":["checked_at"],"count_at":{"path":["tuition_values"],"unit":"published tuition amounts"}}]
+  },
+  "result_directory": {"path": "records/", "title": "Canadian tuition histories and graduate income cohorts"}
 }

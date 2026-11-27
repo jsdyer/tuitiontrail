@@ -9,6 +9,8 @@ import tempfile
 from urllib.parse import urlsplit
 
 from search_metadata import add_search_metadata
+from records import first_view, write_records
+from refresh import validate
 
 ROOT = Path(__file__).resolve().parents[1]
 SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -17,7 +19,7 @@ SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 def metadata(root=ROOT):
     tool = json.loads((root / "tool.json").read_text(encoding="utf-8"))
     required = {"id", "title", "description", "category", "tags", "icon", "url", "source", "hosting", "access", "data_info"}
-    if not isinstance(tool, dict) or set(tool) != required:
+    if not isinstance(tool, dict) or set(tool) - {"result_directory"} != required:
         raise ValueError("tool.json has missing or unknown fields")
     for key in required - {"tags", "data_info"}:
         if not isinstance(tool[key], str) or not tool[key].strip():
@@ -87,7 +89,7 @@ def render_page(page, tool, asset_prefix):
         page = page.replace(placeholder, markup if on_coolcode else "")
     if re.search(r"\{\{[A-Z_]+\}\}", page):
         raise ValueError("Unresolved template placeholder in web/index.html")
-    return add_search_metadata(page, tool)
+    return add_search_metadata(page, tool, category="EducationalApplication")
 
 
 def build(root=ROOT):
@@ -103,6 +105,11 @@ def build(root=ROOT):
         shutil.copytree(web, stage)
         index = stage / "index.html"
         page = index.read_text(encoding="utf-8")
+        edition = validate(json.loads((web / "data/edition.json").read_text()))
+        settings = json.loads((web / "settings.json").read_text())
+        for key, value in first_view(edition, settings).items():
+            page = page.replace("{{" + key + "}}", value)
+        write_records(stage, tool, edition)
         common = read_common_pages(root)
         links = ' · '.join(f'<a href="./{entry["slug"]}/">{escape(entry["title"])}</a>' for entry in common)
         marker = "<!-- common-use-links -->"

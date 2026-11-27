@@ -1,16 +1,14 @@
-"""Exercise the built starter at a project subpath in Chromium."""
+"""Exercise the real tuition comparison and crawlable records in Chromium."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import os
 from pathlib import Path
-import shutil
 import tempfile
-import sys
 import threading
+
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
-from build import build
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -21,53 +19,66 @@ class QuietHandler(SimpleHTTPRequestHandler):
 def main():
     screenshots = ROOT / "browser-checks"
     screenshots.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory() as temporary:
-        shutil.copytree(ROOT / "dist", Path(temporary) / "example-tool")
-        example = Path(temporary) / "preset-fixture"
-        example.mkdir()
-        shutil.copytree(ROOT / "web", example / "web")
-        shutil.copytree(ROOT / "examples/common-pages", example / "common-pages")
-        for name in ("tool.json", "README.md"):
-            shutil.copyfile(ROOT / name, example / name)
-        build(example)
-        server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=temporary))
+    with tempfile.TemporaryDirectory() as temp:
+        (Path(temp) / "tuitiontrail").symlink_to(ROOT / "dist", target_is_directory=True)
+        server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=temp))
         threading.Thread(target=server.serve_forever, daemon=True).start()
+        home = f"http://127.0.0.1:{server.server_port}/tuitiontrail/"
         try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch()
-                page = browser.new_page(viewport={"width": 1280, "height": 1000})
+            with sync_playwright() as playwright:
+                browser = playwright.chromium.launch(executable_path=os.getenv("CHROMIUM_PATH"))
                 errors = []
+                page = browser.new_page(viewport={"width": 1280, "height": 960})
+                page.route("**/assets/tool-metrics.js", lambda route: route.fulfill(body=""))
                 page.on("pageerror", lambda error: errors.append(str(error)))
-                page.goto(f"http://127.0.0.1:{server.server_port}/example-tool/")
-                assert page.locator("#input").input_value() == "Halifax\nLangley\nHalifax\nVancouver"
-                assert page.locator("#output").input_value() == "Halifax\nLangley\nVancouver"
-                assert "1 duplicate removed" in page.locator("#status").inner_text()
-                page.locator("#input").fill('<img src=x onerror="alert(1)">\n<img src=x onerror="alert(1)">')
-                assert page.locator("#output").input_value() == '<img src=x onerror="alert(1)">'
-                assert page.locator("img").count() == 0
-                page.locator("#clear").click()
-                assert page.locator("#output").input_value() == ""
-                assert "Paste one item per line" in page.locator("#status").inner_text()
-                page.locator("#sample").click()
-                assert page.locator("#output").input_value() == "Halifax\nLangley\nVancouver"
+                page.goto(home)
+                page.locator("#fees").wait_for()
+                default = page.locator("#tuition-output").inner_text()
+                assert "Nursing" in default and "Nova Scotia" in default and "British Columbia" in default
+                assert "$" in default
                 page.screenshot(path=str(screenshots / "desktop.png"), full_page=True)
-                page.set_viewport_size({"width": 390, "height": 844})
-                page.goto(f"http://127.0.0.1:{server.server_port}/example-tool/")
-                assert page.locator("#input").bounding_box()["y"] < 844
-                assert page.locator("#output").input_value() == "Halifax\nLangley\nVancouver"
-                assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
-                page.screenshot(path=str(screenshots / "mobile.png"), full_page=True)
-                page.goto(f"http://127.0.0.1:{server.server_port}/preset-fixture/dist/remove-duplicate-cities/")
-                assert page.locator("#output").input_value() == "Vancouver\nHalifax\nCharlottetown"
-                page.locator("#input").fill("Surrey\nSurrey\nOttawa")
-                assert page.locator("#output").input_value() == "Surrey\nOttawa"
-                page.get_by_role("button", name="Restore example").click()
-                assert page.locator("#output").input_value() == "Vancouver\nHalifax\nCharlottetown"
+                fees = page.locator("#fees")
+                fees.get_by_label("Field of study").select_option("Education")
+                fees.get_by_label("First place").select_option("Ontario")
+                fees.get_by_label("Academic year").select_option("2019/2020")
+                assert "2019/2020" in page.locator("#tuition-output").inner_text()
+                page.locator("#income").get_by_label("Graduation year").select_option("2010")
+                assert "10 years (2020)" in page.locator("#income-output").inner_text()
+                page.reload()
+                fees.wait_for()
+                assert fees.get_by_label("Field of study").input_value() == "Education"
+                assert fees.get_by_label("First place").input_value() == "Ontario"
+                assert fees.get_by_label("Academic year").input_value() == "2019/2020"
+                page.locator("summary").click()
+                assert page.locator("#fee-history th").count() > 8
+                page.get_by_role("link", name="Ontario tuition history").click()
+                assert page.locator("h1").inner_text() == "Education undergraduate tuition in Ontario"
+                assert page.locator("tbody tr").count() > 10
+                for width in [390, 320]:
+                    page.set_viewport_size({"width": width, "height": 844})
+                    page.goto(home)
+                    fees.wait_for()
+                    assert fees.bounding_box()["y"] < 844
+                    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+                    fees.get_by_label("First place").select_option("Ontario")
+                    assert "Ontario" in page.locator("#tuition-output").inner_text()
+                    if width == 390:
+                        page.screenshot(path=str(screenshots / "mobile.png"), full_page=True)
+                offline = browser.new_context(java_script_enabled=False)
+                static = offline.new_page()
+                static.goto(home)
+                assert static.locator("#tuition-output").inner_text() == default
+                assert "$" in static.locator("#income-output").inner_text()
+                static.get_by_role("link", name="Nova Scotia tuition history").click()
+                assert static.locator("tbody tr").count() > 10
+                static.get_by_role("link", name="All records").click()
+                static.get_by_role("link", name="Sources and interpretation").click()
+                assert static.locator("h1").inner_text() == "How to read tuition and graduate income"
                 assert not errors, errors
                 browser.close()
-            print("Browser checks passed: project subpath, sample, clear, safe text and mobile layout")
         finally:
             server.shutdown()
+            server.server_close()
 
 
 if __name__ == "__main__":

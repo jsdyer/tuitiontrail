@@ -1,39 +1,16 @@
-<!doctype html>
-<html lang="en-CA">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="{{DESCRIPTION}}">
-  <title>{{TITLE}} · CoolCode</title>
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.mjs"></script>
-  {{VISIT_COUNTER}}
-</head>
-<body data-tool-id="{{TOOL_ID}}">
-  <a class="skip" href="#main">Skip to content</a>
-  <header><a href="https://coolcode.ca/">← CoolCode.ca</a><a href="{{SOURCE_URL}}">Source &amp; instructions ↗</a></header>
-  <main id="main">
-    <h1>{{TITLE}}</h1>
-    <p class="intro">{{DESCRIPTION}}</p>
-    <section aria-labelledby="example-title">
-      <h2 id="example-title">Remove duplicate lines</h2>
-      <p>Edit the city names or paste your own list, one item per line. The first copy of each line keeps its place.</p>
-      <p id="status" role="status" aria-live="polite">3 unique lines. 1 duplicate removed.</p>
-      <div class="panels">
-        <div><label for="input">Original lines</label><textarea id="input" rows="5" maxlength="100000" spellcheck="false" placeholder="Paste one item per line">Halifax
-Langley
-Halifax
-Vancouver</textarea></div>
-        <div><label for="output">Cleaned lines</label><textarea id="output" rows="5" readonly spellcheck="false">Halifax
-Langley
-Vancouver</textarea></div>
-      </div>
-      <div class="actions"><button id="sample" type="button">Restore example</button><button id="clear" type="button">Clear</button><button id="copy" type="button" hidden>Copy result</button></div>
-      <noscript><p>This tool needs JavaScript to process your text. The source is available above.</p></noscript>
-    </section>
-    <!-- common-use-links -->
-    <aside aria-label="Privacy"><strong>Stays on your device.</strong> The browser processes your text in this tab. Reloading clears it.</aside>
-  </main>
-  <footer>Part of <a href="https://coolcode.ca/">the CoolCode collection</a>. {{ISSUE_LINK}}</footer>
-</body>
-</html>
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compare Canadian Undergraduate Tuition by Province and Field · Tuition Trail</title><meta name="description" content="{{DESCRIPTION}}"><link rel="stylesheet" href="{{ASSET_PREFIX}}style.css">{{VISIT_COUNTER}}</head>
+<body data-tool-id="{{TOOL_ID}}"><a class="skip" href="#main">Skip to comparison</a>
+<header><nav class="wrap"><a class="brand" href="./">{{TITLE}}</a><a href="./records/">Browse records</a><a href="https://coolcode.ca/">CoolCode.ca</a></nav></header>
+<main class="wrap" id="main"><section class="hero"><h1>What does tuition cost across Canada?</h1><p>Pick a field and two places to compare average annual tuition for Canadian undergraduate students.</p></section>
+<section class="panel" aria-labelledby="tuition-title"><h2 id="tuition-title">Compare undergraduate tuition</h2>
+<form id="fees" hidden><label>Field of study<select name="field"></select></label><label>First place<select name="left"></select></label><label>Second place<select name="right"></select></label><label>Academic year<select name="year"></select></label></form>
+<div id="tuition-output" aria-live="polite">{{FEE_RESULT}}</div>
+<p class="note">Fees are enrolment-weighted averages in current Canadian dollars, before financial aid. Nova Scotia, Québec and Newfoundland and Labrador can charge different rates by student residency. <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710000301">Tuition table and notes</a></p>
+<details><summary>See tuition history for these places</summary><div id="fee-history">{{FEE_HISTORY}}</div></details>
+</section>
+<section class="panel" aria-labelledby="income-title" id="graduate-income"><h2 id="income-title">What did earlier graduates earn?</h2><p>Follow an undergraduate degree cohort from graduation through its second, fifth and tenth years. This table uses broad fields. Health and related fields includes programs beyond nursing.</p>
+<form id="income" hidden><label>Graduate field<select name="incomeField"></select></label><label>Place of study<select name="incomePlace"></select></label><label>Graduation year<select name="cohort"></select></label></form>
+<div id="income-output" aria-live="polite">{{INCOME_RESULT}}</div>
+<p class="note">These medians cover Canadian students aged 15–64 reporting employment income, including self-employment. The longitudinal group excludes people missing income information or returning to full-time studies during the ten years. <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710028701">Graduate table and notes</a></p>
+</section>
+<footer><p id="load-note"><a href="./records/">Browse all tuition histories and graduate fields</a> · <a href="./records/sources/">Sources and interpretation</a> · <a href="https://coolcode.ca/wagewindow/">Compare current occupational wages</a></p><p>{{CHECKED}} · <a href="https://www.statcan.gc.ca/en/reference/licence">Statistics Canada Open Licence</a> · <a href="{{SOURCE_URL}}">Source code</a> · {{ISSUE_LINK}}</p></footer></main><!-- common-use-links --><script type="module" src="{{ASSET_PREFIX}}app.mjs"></script></body></html>

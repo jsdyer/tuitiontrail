@@ -81,7 +81,7 @@ class BuildTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     build(self.root)
         manifest.write_text('[{"slug":"data","title":"Data","description":"Some data"}]')
-        (self.root / "web/data").mkdir()
+        (self.root / "web/data").mkdir(exist_ok=True)
         with self.assertRaisesRegex(ValueError, "collides"):
             build(self.root)
 
