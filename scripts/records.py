@@ -124,6 +124,9 @@ def write_records(stage, tool, edition):
             body=('<section class="panel"><h2>Annual tuition history</h2><p>'+link("../../../?"+compare,"Open this comparison")+' · '+link("../","Compare places for "+field.lower())+'</p>'
                   +table("Weighted tuition fees in current CAD",["Academic year","Average tuition"],[(y+(" (preliminary)" if y in prelim else ""),[show(years[y])]) for y in sorted(years,reverse=True)])
                   +tuition_notes+'<p>'+link("../../places/"+slug(place)+"/","Other fields in "+place)+'</p></section>')
+            if field == "Nursing" and place in ("Nova Scotia", "British Columbia"):
+                field_note = "https://coolcode.ca/field-notes/nursing-tuition-and-rent-in-nova-scotia-and-bc/"
+                body += '<p>' + link(field_note, "Compare nursing tuition and rent for an eight-month student budget") + '</p>'
             save(p,title,desc,body)
             field_rows.append((place,[current,escape(last+pr),link("./"+slug(place)+"/","History")]))
         title=field+" undergraduate tuition by place"
